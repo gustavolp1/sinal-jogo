@@ -9,6 +9,7 @@ def main(page: ft.Page):
     page.theme_mode = "light"
     page.window_width = 450
     page.window_height = 700
+    page.bgcolor = "#f5f5f5"
 
     # Constants
     NUM_ROWS = 6
@@ -34,6 +35,7 @@ def main(page: ft.Page):
     def pick_new_word():
         nonlocal target_word
         target_word = random.choice(answer_words)
+        #target_word = "SINAL"
         print("Target word:", target_word)
 
     def reset_game(e=None):
@@ -175,7 +177,68 @@ def main(page: ft.Page):
                     break
             update_row(current_row)
 
+    # === INFO POPUP ===
+
+    def open_info(e):
+        print("Info button clicked!")
+        if info_dialog not in page.overlay:
+            page.overlay.append(info_dialog)
+        info_dialog.open = True
+        page.update()
+
+    def close_info(e):
+        info_dialog.open = False
+        page.update()
+
+    info_dialog = ft.AlertDialog(
+        modal=True,
+        title=ft.Text("Como jogar", weight="bold", size=18),
+        content=ft.Column(
+            [
+                ft.Text("O objetivo do jogo é adivinhar a palavra de 5 sinais em até 6 tentativas."),
+                ft.Text("Cada tentativa deve ser uma palavra válida em Português, digitada com sinais de Libras."),
+                ft.Text("Após cada tentativa, as cores dos quadrados mudarão para mostrar o quão perto você está da resposta:"),
+                ft.Row([ft.Image(src="example_green.png", width=210, height=45), ft.Text("Um sinal na posição correta e um que existe na palavra, mas na posição incorreta.")]),
+                ft.Row([ft.Image(src="example_yellow.png", width=210, height=45), ft.Text("Três sinais que existem na palavra, todos nas posições incorretas.")]),
+                ft.Row([ft.Image(src="example_gray.png", width=210, height=45), ft.Text("Nenhum dos sinais aparece na palavra.")]),
+                ft.Container(height=10),
+                ft.Text("Use o teclado na tela (ou o do seu computador) para inserir os sinais correspondentes às letras."),
+                ft.Text("Boa sorte! 🤟"),
+            ],
+            tight=True,
+            scroll=ft.ScrollMode.AUTO,
+        ),
+        actions=[ft.TextButton("Fechar", on_click=close_info)],
+        actions_alignment=ft.MainAxisAlignment.END,
+    )
+
+    # === INFO BUTTON ON TOP RIGHT ===
+    info_button = ft.IconButton(
+        icon=ft.Icons.INFO_OUTLINE,
+        tooltip="Como jogar",
+        on_click=open_info,
+    )
+
+    # Add info button aligned top-right
+    page.add(
+        ft.Row(
+            [ft.Container(expand=True), info_button],
+            alignment="end",
+            vertical_alignment="start",
+        )
+    )
+
     # === UI CONSTRUCTION ===
+
+    # Logo
+    page.add(
+        ft.Image(
+            src="sinal_logo.png",
+            width=200,
+            height=100,
+            fit=ft.ImageFit.CONTAIN,
+        )
+    )
 
     # Build letter grid
     for row in range(NUM_ROWS):
